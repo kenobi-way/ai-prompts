@@ -31,6 +31,10 @@ Summarize your findings in a table ready for CSV export, with the following colu
 
 **Role:** Current role/title, e.g., "Co-founder & CEO" or "Research Scientist at DeepMind"
 
+**Location:** Where this person is based (lives), empty if not known
+
+**Tags:** Comma-separated list of 1-5 tags that could be used to classify or categorize the type of work this person does, their areas of expertise, their notable skills. For instance, "AI Research Scientist" or "Systems Software Engineer" or "Graphics Research Engineer" OR "Front-end Engineer" OR "Reinforcement Learning" and "Foundation Models" or "Physical AI" and so on.
+
 **Notable Accomplishments & Background:** A 1-line summary of the person’s background and key accomplishments.
   - Example 1: "led the Genesis embodied AI research initiative, PhD CMU Robotics"
   - Example 2: "led Mistral’s first multimodal model, founding researcher at Skild AI, PhD CMU Machine Learning"
