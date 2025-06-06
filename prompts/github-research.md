@@ -20,6 +20,6 @@ Then, collect and synthesize information from github in a table ready for CSV ex
 
 **Homepage:** Personal or academic homepage URL, empty if none found
 
-**Created:** the date on which this repo was created
+**Docs**: Link to docs, e.g. https://dart.readthedocs.io/en/latest/, empty if none found
 
-> use the GitHub API https://api.github.com/repos/{:owner}/{:repository} and look for the "created_at" field in the response to find the repo creation date
+**Created:** the date on which this repo was created -- use the GitHub API https://api.github.com/repos/{:owner}/{:repository} and look for the "created_at" field in the response to find the repo creation date
