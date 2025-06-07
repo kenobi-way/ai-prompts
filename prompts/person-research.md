@@ -8,11 +8,11 @@ Proceed as follows:
 
 3. In general, whenever you find and confirm a valid profile/link, look on that page for additional linked profiles -- github, linkedin, blog/medium/substack, X/twitter, bluesky, and so on -- as this is the best way to find confirmed correct related profiles (online entity resolution is challenging). Links may not always appear in the usual places, as in the case of this engineer who links to his github from the Projects sections of his LinkedIn: https://www.linkedin.com/in/pulpdrew/
 
-4. Find their X/Twitter profile, or open it if you have already found it, and look there for additional links.
+4. Find their GitHub profile, or open it if you have already found it, and look there for additional links.
 
 5. Find their LinkedIn profile, or open it if you have already found it, and look there for additional links.
 
-6. Find their GitHub profile, or open it if you have already found it, and look there for additional links.
+6. Find their X/Twitter profile, or open it if you have already found it, and look there for additional links.
 
 7. As you proceed, double-check any links you find. Do not include any broken or incorrect links; instead, indicate that you could not find the correct link. If a link is broken or incorrect, try harder to find a correct link.
 
