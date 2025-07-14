@@ -1,6 +1,8 @@
-# Guidance for synthesizing information about open source projects on GitHub.
+Here is a list of github projects related to XXX (category):
 
-Then, collect and synthesize information from github in a table ready for CSV export, with the following columns:
+
+
+For each project, find the URL of the github project (repo) if it is not already provided, using a web search on github.com with the project name and category keywords to help disambiguate projects with similar names. Then, collect and synthesize information from github in a table ready for CSV export, with the following columns:
 
 **Name:** Name of the project
 
@@ -23,3 +25,5 @@ Then, collect and synthesize information from github in a table ready for CSV ex
 **Docs**: Link to docs, e.g. https://dart.readthedocs.io/en/latest/, empty if none found
 
 **Created:** the date on which this repo was created -- use the GitHub API https://api.github.com/repos/{:owner}/{:repository} and look for the "created_at" field in the response to find the repo creation date
+
+Finally, create a CSV table ready to copy/download containing all of your research findings.
