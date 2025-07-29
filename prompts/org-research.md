@@ -16,13 +16,15 @@ Summarize your findings in a table ready for CSV export, with the following colu
 
 **Name:** Company/organization name.
 
+**Homepage:** Link to the organization's homepage, if found.
+
 **Locations:** The primary hubs or locations where this company is based; e.g. "SF and NYC" or "Seattle, Bay Area and London". May not correspond to the location where the company was founded.
+
+**Category:** The primary industry category to which this company belongs; e.g. "Enterprise Software" or "AI Drug Discovery" OR "Biotech" OR "Developer Tools".
 
 **Tags:** Comma-separated list of 1-5 tags that could be used to classify or categorize this type of organization, their customer base, etc. For instance, "Consumer, Gaming" or "Security, Infrastructure, Enterprise" OR "AI, Dev Tools, Startups".
 
 **Description:** 1-3 concise sentences that describe what the business does/builds/sells
-
-**Homepage:** Link to the organization's homepage, if found.
 
 **Crunchbase:** Link to the organization's Crunchbase page, if found.
 
@@ -32,12 +34,16 @@ Summarize your findings in a table ready for CSV export, with the following colu
 
 **GitHub:** Link to the organization's GitHub page, if found.
 
+**Key People:** Names & titles of founders and other key / well-known people associated with this organization.
+
 **Year Founded:** The year that the company was founded/created/started, if known.
 
 **Type:** What kind of organization this is; e.g. "Startup", "Public Corporation", "Private Equity Firm", "VC Firm", "Consulting Firm", "Research Institute", "Private University", "Public University", and so on.
 
 **Stage:** For privately held companies, what is the funding stage of the business? e.g. "Pre-Seed", "Seed", "Series A", "Series E + Venture Debt"
 
-**Capitalization:** How much capital the company has raised to date, the size / date / stage of the last round of funding, the latest known valuation, and any notable "tier one" investors.
+**Funding:** How much capital the company has raised to date, the size / date / stage of the last round of funding, the latest known valuation, and any notable "tier one" investors.
 
-**Founders and Key People:** Names & titles of founders and any notable/well-known advisors or key employees.
+**Last Round:** Date and amount of the most recent funding round.
+
+**Investors:** List of any institutional or angel investors in this company, the amount invested if known, and any other details such as who is the lead investor, who is on the board, etc.
