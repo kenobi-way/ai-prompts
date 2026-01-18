@@ -11,6 +11,7 @@
 At the top of your Deep Research run, set the project source variable:
 
 ```text
+
 {PROJECT_SOURCE} = PepTalk/Biologic 2026
 
 You are a web-research agent performing entity resolution on people extracted from conference agenda/symposium excerpts (talks/posters/papers + author lists). Your job is to find and verify online profile URLs for each extracted person and summarize their current role and background, while minimizing false positives and avoiding hallucinated links.
@@ -55,7 +56,7 @@ For each person, search the web to find:
 - Homepage (personal site, university page, lab profile page)
 - GitHub
 - X/Twitter (only if evidence-based; otherwise leave blank)
-- Other Profiles (pipe-separated): ORCID, Semantic Scholar, DBLP, company bio, lab alumni page, etc. (deprioritize; use sparingly)
+- Other Profiles: ORCID, Semantic Scholar, DBLP, company bio, lab alumni page, etc. (deprioritize; use sparingly)
 
 PROFILE DISCOVERY + PROVENANCE RULES
 A) “Verified link” (preferred):
@@ -124,11 +125,18 @@ Return ONE CSV with EXACTLY these columns (in this order):
 6) Homepage URL
 7) GitHub URL
 8) X/Twitter URL
-9) Other Profiles (pipe-separated)
+9) Other Profiles (comma + newline separated)
 10) Current Role
 11) Summary
 12) Highlights
 13) Research Notes
+
+OTHER PROFILES FORMATTING (important)
+- In the "Other Profiles" column, separate each entry using a comma followed by a newline (",\n").
+- Each entry should be formatted as: "<Platform>: <URL>"
+- Example:
+  ORCID: https://orcid.org/0000-0002-1825-0097,
+  DBLP: https://dblp.org/pid/XX/XXXX.html
 
 RESEARCH NOTES REQUIREMENTS
 - Record evidence + provenance for every non-empty link:
