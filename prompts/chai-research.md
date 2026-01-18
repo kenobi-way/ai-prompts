@@ -88,7 +88,7 @@ For each person, search the web to find candidate URLs for:
 - Homepage (personal site, university page, lab profile page)
 - GitHub
 - X/Twitter (only if evidence-based)
-- Other Profiles: ORCID, Semantic Scholar, DBLP, Kaggle, Medium/Substack, company bio, lab alumni page, etc. (deprioritize; use sparingly)
+- Other Profiles: ORCID, Semantic Scholar, DBLP, Kaggle, Medium/Substack, company bio, etc. (deprioritize; use sparingly)
 
 Search strategies:
 - "<Full Name>" + (affiliation OR institution OR lab OR coauthor OR title keywords)
