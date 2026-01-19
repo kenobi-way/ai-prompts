@@ -35,7 +35,7 @@ LINK STATUS DEFINITIONS (use in Research Notes)
 - — = none found / nothing credible.
 
 INPUT
-I will provide a text document / PDF excerpt / agenda snippet that may contain:
+I will provide one or more text documents / PDF excerpts / agenda snippets / CSVs that may contain:
 - session titles, poster titles, talk titles, abstracts
 - author lists (First Last, Last, First, initials, etc.)
 - affiliations (sometimes present)
