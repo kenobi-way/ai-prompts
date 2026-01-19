@@ -1,16 +1,20 @@
-# Deep Research Prompt — Conference Agenda / Symposium Entity Resolution (v1.5)
+# Deep Research Prompt — Conference Agenda / Symposium Entity Resolution (v1.6)
 
-> **Key retrofit:** Switch to an explicit **multi-pass pipeline**: **Homepage → Google Scholar → LinkedIn → Other** (to exploit cross-links), and **relax Google Scholar** collection rules to allow **search-result candidates** when Scholar is blocked (403/login), with clear confidence labeling in **Research Notes**.  
-> **Output:** A **Markdown table** (renders in ChatGPT) + optional **CSV** (plain ASCII quotes only when required).
+> **Mode:** Best-effort, opportunistic link discovery with confidence scores.  
+> **Goal:** For every person in the list, find the **best matching link per platform** (Homepage, Scholar, LinkedIn, GitHub, X), even if only supported by **search-result snippets** or **inaccessible pages**, while discarding only **obvious non-matches**.  
+> **Output:** A **Markdown table** (renders in ChatGPT) + optional **CSV** in a code block (plain ASCII quotes only when required).  
+> **Notes convention:** Use **V** = Verified, **P** = Possible/Potential (not opened / snippet-based), **—** = none.
 
 ---
 
 ## How to Run (per project)
 
+At the top of your Deep Research run:
+
 ```text
 {PROJECT_SOURCE} = PepTalk/Biologic 2026
 
-You are a web-research agent performing entity resolution on people extracted from conference agenda/symposium excerpts (talks/posters/papers + author lists). Your job is to find and verify online profile URLs for each extracted person and summarize their current role and background, while minimizing false positives and avoiding hallucinated links.
+You are a web-research agent performing entity resolution on people extracted from conference agenda/symposium excerpts (talks/posters/papers + author lists). Your job is to find the best matching online profile URLs for each person and summarize their current role/background. Humans will validate later, so prioritize coverage and surface uncertainty using confidence scores and provenance notes.
 
 FORMATTING RULE (important)
 - Never use curly quotes. Use only plain ASCII quotes: " and '.
@@ -18,11 +22,17 @@ FORMATTING RULE (important)
 PROJECT SOURCE (variable)
 - Use the provided value {PROJECT_SOURCE} in the column "Project Source" for all rows in this run.
 
-CRITICAL RULES (anti-hallucination + precision)
-1) Do NOT invent links. Only output a URL if you observed it directly on a page (opened page, OR a search results listing), and record the provenance in Research Notes.
-2) Minimize false positives. If you cannot confidently match a profile to the person, leave that field blank OR include it explicitly as a "candidate" and label it as such in Research Notes.
-3) Prefer primary sources and cross-references: personal homepage, institutional/lab page, company bio, conference speaker bio page, Google Scholar.
-4) De-prioritize noisy aggregators (ResearchGate, etc.). ORCID / Semantic Scholar may be included only in "Other Profiles" and should be used sparingly.
+BEST-EFFORT / OPPORTUNISTIC RECALL MODE (goal: fill links, keep confidence honest)
+
+PRINCIPLES
+- Prioritize coverage: for each person and each platform, aim to output the single best-matching URL even if it is supported only by search-result snippets or the page is inaccessible.
+- Discard only obvious non-matches (clear contradictions).
+- Always label provenance (V/P) and confidence so humans can validate later.
+
+LINK STATUS DEFINITIONS (use in Research Notes)
+- V = Verified: you opened the page OR it is cross-linked from an opened primary source and identity signals match.
+- P = Possible/Potential: you did NOT open the target page (blocked/inaccessible) OR you only saw it in search results/snippets.
+- — = none found / nothing credible.
 
 INPUT
 I will provide a text document / PDF excerpt / agenda snippet that may contain:
@@ -46,79 +56,104 @@ TASK A — Extract and normalize the person list (who to include)
    - If uncertain whether two mentions are the same person, keep them as separate rows and explain ambiguity in Research Notes.
 
 Keep an internal "Context Packet" per person (not a table column):
-- titles/keywords, coauthors, affiliations, conference name/year, orgs mentioned, and any paper/poster IDs.
+- titles/keywords, coauthors, affiliations, conference name/year, orgs mentioned, paper/poster IDs.
 
 TASK B — Multi-pass profile discovery (IMPORTANT ORDER)
-Use this explicit pass order for each person:
+Use this explicit pass order for each person. Even if you fail early, continue to later passes to fill columns.
 
 PASS 1 — HOMEPAGE FIRST (highest leverage)
-Goal: Find a high-confidence homepage/institutional profile/company bio that matches the Context Packet.
-- Search queries (examples):
-  - "<Full Name>" <affiliation/lab/company> homepage
+Goal: Find a high-quality homepage/institutional profile/company bio that matches the Context Packet.
+- Search query examples:
+  - "<Full Name>" <affiliation/lab/company> (homepage OR profile OR bio)
   - "<Full Name>" <poster/talk title keywords>
   - "<Full Name>" site:.edu <lab/advisor/org>
 - If you find a homepage/profile:
-  - Open it.
-  - Harvest outbound links to Scholar/LinkedIn/GitHub/X and record provenance.
-  - If the page clearly belongs to the person, mark Homepage URL as Verified.
+  - Open it when possible.
+  - Harvest outbound links to Scholar/LinkedIn/GitHub/X and record provenance (V if opened/cross-linked; otherwise P).
+  - Prefer a personal homepage or institutional profile over third-party pages.
 
-PASS 2 — GOOGLE SCHOLAR (relaxed candidate policy)
-Goal: Find Scholar profile even if Scholar pages cannot be opened (403/access limits).
-REQUIRED: Run at least one Scholar-targeted query per person:
+PASS 2 — GOOGLE SCHOLAR (best-effort; snippet-based allowed)
+Goal: Find the best-matching Scholar profile even if Scholar pages cannot be opened (403/login/robots).
+REQUIRED: Run at least one Scholar query per person:
   - "<Full Name>" site:scholar.google.com/citations
   - "<Full Name>" <affiliation/lab/company> site:scholar.google.com/citations
-If you find a Scholar URL (citations?user=...):
-- If you can open the Scholar page and confirm identity signals -> Verified (High/Medium based on signals).
-- If you cannot open it (403/login/robots) OR only see it in search results:
-  -> You MAY include it as Candidate (search result) and label it clearly in Research Notes.
+- If you can open the Scholar page and confirm identity signals -> V.
+- If you cannot open it OR only see it in search results -> P (allowed).
 - If multiple plausible Scholar profiles exist:
-  - Include up to 2 Scholar candidate URLs in Research Notes (do not put multiple in the Scholar column).
-  - Put the best single candidate in the Google Scholar URL column ONLY if it is at least Medium and has no contradictions.
-  - Otherwise leave the Scholar column blank and list candidates in Research Notes.
+  - Choose the best single Scholar URL for the Google Scholar URL column if it is at least plausible with no hard contradictions.
+  - List up to 2 alternate Scholar URLs in Research Notes as ALT-GS.
 
-PASS 3 — LINKEDIN
-Goal: Prefer LinkedIn found via cross-links from verified pages; otherwise include search-result candidates.
-- Prefer sourcing LinkedIn URLs via cross-links on opened pages:
+PASS 3 — LINKEDIN (best-effort; snippet-based allowed)
+Goal: Find best-matching LinkedIn.
+- Prefer LinkedIn found via cross-links on opened pages:
   1) Homepage -> LinkedIn link/icon
   2) Lab/institution/company bio -> LinkedIn link/icon
   3) Conference speaker bio -> LinkedIn link/icon
 - If not found, use search:
   site:linkedin.com/in "<name>" <affiliation OR coauthor OR topic keyword>
-- If LinkedIn is only found via search results:
-  - Include it as Candidate (search result) and label accordingly in Research Notes.
+- If LinkedIn is only found via search results OR page cannot be opened -> P (allowed).
+- If multiple plausible LinkedIn profiles exist:
+  - Choose the best one for the LinkedIn URL column and list up to 2 alternates in Research Notes as ALT-LI.
 
-PASS 4 — OTHER PROFILES
-Goal: GitHub, X/Twitter, ORCID, Semantic Scholar, DBLP, Kaggle, Medium/Substack, etc.
-- Prefer links discovered via Homepage/Scholar/Institutional pages.
-- Deprioritize ORCID/Semantic Scholar/ResearchGate; include them only when useful and clearly matching.
-- For X/Twitter: only include if evidence-based (cross-link or strong matching signals); otherwise leave blank.
+PASS 4 — OTHER PROFILES (GitHub, X/Twitter, ORCID, Semantic Scholar, DBLP, etc.)
+Goal: Fill remaining platforms opportunistically.
+- GitHub:
+  - Try: site:github.com "<Full Name>" <affiliation/keywords>
+  - If you find a handle on any page, pivot-search the handle across platforms.
+- X/Twitter:
+  - Try: site:x.com "<Full Name>" <affiliation/keywords>
+  - Also try: site:twitter.com "<Full Name>" <affiliation/keywords>
+  - Include only if plausible; mark as P if snippet-based.
+- Other Profiles (deprioritize but allowed): ORCID, Semantic Scholar, DBLP, Kaggle, Medium/Substack, company bio pages, lab alumni pages.
+  - Prefer URLs discovered via Homepage/Scholar/Institutional pages.
 
-PROFILE DISCOVERY + PROVENANCE RULES
-A) "Verified link" (preferred):
-- A URL is VERIFIED if it is directly linked from or displayed on a primary source page you opened (homepage, lab page, company bio, conference bio), OR if you opened the target page and confirmed identity signals.
+BEST-CANDIDATE POLICY (per platform column)
+For each person and each platform column (Homepage, Scholar, LinkedIn, GitHub, X):
+- If a Verified (V) URL exists, use it.
+- Else choose the best Possible/Potential (P) URL from search results/snippets.
+- Leave blank only if:
+  (a) no credible candidate exists, OR
+  (b) all candidates are obvious non-matches.
+- If multiple plausible candidates remain, put the best one in the column and list up to 2 alternates in Research Notes.
 
-B) "Candidate link from search results" (allowed; explicitly for Scholar + LinkedIn):
-- You MAY include URLs found in search results as CANDIDATES even if you cannot open the target page.
-- You MUST label them in Research Notes as "Candidate (search result)" and describe snippet cues used (employer, title, location, keywords) and any remaining ambiguity.
-- Candidate links should generally be treated as Medium unless very strong context exists; do not treat search-only links as High.
+OBVIOUS NON-MATCH DISCARD RULES (exclude these links)
+Discard a candidate if ANY of the following is true:
+- Clear field mismatch that contradicts context packet (e.g., unrelated profession/industry).
+- Clear affiliation mismatch plus no overlapping signals (different employer/lab + different research area).
+- Clear identity mismatch (different full name when the target person's full name is known; different consistent biography).
+Otherwise keep it as P with Medium/Low confidence.
 
 TASK C — Entity resolution + confidence
-Per-link confidence:
-- High: 3+ strong signals OR explicit cross-linking between primary sources
-- Medium: 2 strong signals; no contradictions; ambiguity remains OR link is a search-result candidate with good contextual cues
-- Low: name-only match, or contradictions present (prefer leaving blank over including Low)
+Evaluate signals:
+
+Strong signals:
+- name match (incl variants)
+- affiliation match (lab/institution/company)
+- publication overlap (titles/coauthors/venues)
+- cross-links (Homepage <-> Scholar; Homepage lists GitHub/LinkedIn)
+- timeline consistency
+
+Supporting signals:
+- handle reuse across platforms
+- profile photo similarity (supporting only)
+
+Per-link confidence (do not overthink; be consistent):
+- High: strong signals, cross-links, or opened confirmation; minimal ambiguity
+- Medium: plausible match with some supporting signals; snippet-based; ambiguity remains but no contradictions
+- Low: weak match (mostly name-based) OR multiple plausible identities OR partial contradictions
+Note: Low links are allowed in this best-effort mode, but must be clearly labeled in Research Notes and should lower Overall Confidence.
 
 OVERALL CONFIDENCE (table column)
 Set "Overall Confidence" per person-row:
-- High: all included links are High, and no contradictions noted
-- Medium: at least one included link is Medium, and no Low links are included
-- Low: any included link is Low OR contradictions are present OR identity remains materially ambiguous
+- High: most key links (Homepage/Scholar/LinkedIn) are V or strongly supported; no meaningful contradictions
+- Medium: mix of V and P; or some ambiguity; no strong contradictions
+- Low: key links are mostly P with weak signals, OR any material contradictions/identity ambiguity
 
 TASK D — Summarize "where are they now?"
-Using best available evidence (prefer verified sources):
+Use best available evidence (prefer opened pages but snippet-based is allowed with caution):
 - Current Role: title + org + dates if available
 - Summary: 2–4 sentences on focus + career path (degrees/schools + work history when available)
-- Highlights: exceptional achievements and notable publications/citations ONLY if directly evidenced; do not guess
+- Highlights: exceptional achievements and notable publications/citations ONLY if evidenced (opened sources preferred; snippet-based allowed but label uncertainty)
 
 OTHER PROFILES FORMATTING (table-friendly + CSV-safe)
 - In the Markdown table:
@@ -137,17 +172,24 @@ OUTPUT CONTRACT (render as a table in ChatGPT + optional CSV)
   - Do not quote fields unless required (commas, quotes, or newlines in a field).
   - Use LF newlines.
 - Do NOT output bullet lists of links. Do NOT narrate person-by-person outside the table.
+- Do NOT output quoted CSV lines outside code blocks.
 
 MARKDOWN TABLE COLUMNS (exactly these; same order)
 Project Source | Name | Overall Confidence | LinkedIn URL | Google Scholar URL | Homepage URL | GitHub URL | X/Twitter URL | Other Profiles | Current Role | Summary | Highlights | Research Notes
 
-RESEARCH NOTES REQUIREMENTS
-- Record evidence + provenance for every non-empty link:
-  - "Verified via <source page> (opened)" OR "Candidate (search result) via <query/snippet>"
-- Include key matching signals used (affiliation/coauthors/titles).
-- If Medium: state what's missing (no cross-link, sparse profile, common name).
-- If contradictions exist: describe them clearly.
-- If you left fields blank: briefly state what you tried (queries, sources checked).
+RESEARCH NOTES FORMAT (required; make it easy to scan/filter)
+- Start with a compact status line using tags:
+  HP:[V|P|—] GS:[V|P|—] LI:[V|P|—] GH:[V|P|—] X:[V|P|—]
+- For each P (Possible/Potential) link, include snippet cues:
+  - Example: LI:P(snippet: "VP BD, SPOC Biosciences", matches poster A45)
+- If alternates exist, list up to 2:
+  - ALT-GS: <url1> (why), <url2> (why)
+  - ALT-LI: <url1> (why), <url2> (why)
+- Then add 1–3 short bullets (or short sentences) with the key disambiguation signals used:
+  - affiliation/lab/company match
+  - poster/talk title keyword match
+  - coauthor overlap
+  - cross-links found
 
 BEGIN by extracting people and then produce:
 1) One short line stating how many people were extracted.
