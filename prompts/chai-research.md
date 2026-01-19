@@ -194,4 +194,4 @@ RESEARCH NOTES FORMAT (required; make it easy to scan/filter)
 BEGIN by extracting people and then produce:
 1) One short line stating how many people were extracted.
 2) The Markdown table per the Output Contract.
-3) Optionally, the CSV in a ```csv``` code block.
+3) The CSV in a ```csv``` code block.
